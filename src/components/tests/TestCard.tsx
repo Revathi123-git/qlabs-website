@@ -11,8 +11,10 @@ export function TestCard({ test }: { test: LabTest }) {
         <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-teal-50 text-brand-teal-500 transition group-hover:bg-brand-teal-500 group-hover:text-white">
           <FlaskConical size={20} />
         </span>
-        <span className="rounded-full bg-brand-blue-50 px-3 py-1 text-[11px] font-semibold text-brand-blue-600">{test.category}</span>
-      </div>
+<span className="inline-flex items-center gap-1.5 rounded-full bg-brand-teal-50 px-3 py-1.5 text-[11px] font-semibold text-brand-teal-700">
+  <FlaskConical size={13} />
+  {test.category}
+</span>      </div>
       <h3 className="mt-5 text-base font-bold leading-snug text-ink">{test.name}</h3>
       <dl className="mt-4 space-y-2 text-xs text-muted">
         <div className="flex items-center gap-2">
