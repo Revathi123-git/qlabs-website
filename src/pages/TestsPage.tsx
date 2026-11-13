@@ -1,14 +1,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Search,
   SearchX,
   Grid2X2,
-  Droplets,
-  RefreshCw,
+  Thermometer,
   ShieldCheck,
   Apple,
-  Pill,
   HeartPulse,
   Activity,
   Dna,
@@ -31,18 +28,16 @@ export function TestsPage() {
   // Icons for each test category
   const categoryIcons: Record<string, typeof Grid2X2> = {
     All: Grid2X2,
-    Blood: Droplets,
-    Recovery: RefreshCw,
+    Fever: Thermometer,
     Inflammation: ShieldCheck,
     Nutrition: Apple,
-    'Additional Info & Vitamins': Pill,
     Heart: HeartPulse,
     Thyroid: Activity,
     Hormone: Dna,
-    Gut: Activity,
     'Liver & Hepatic Tests': FlaskConical,
   };
 
+  // Load tests and categories from Supabase
   useEffect(() => {
     let cancelled = false;
 
@@ -50,27 +45,34 @@ export function TestsPage() {
       setIsLoading(true);
       setError(null);
 
-      const [testsResult, categoriesResult, linksResult] = await Promise.all([
-        supabase
-          .from('tests')
-          .select('id, name, selling_price, report_turnaround_hours, display_order')
-          .eq('is_active', true)
-          .order('display_order', { ascending: true }),
+      const [testsResult, categoriesResult, linksResult] =
+        await Promise.all([
+          supabase
+            .from('tests')
+            .select(
+              'id, name, selling_price, report_turnaround_hours, display_order',
+            )
+            .eq('is_active', true)
+            .order('display_order', { ascending: true }),
 
-        supabase
-          .from('categories')
-          .select('id, name')
-          .eq('is_active', true)
-          .order('display_order', { ascending: true }),
+          supabase
+            .from('categories')
+            .select('id, name')
+            .eq('is_active', true)
+            .order('display_order', { ascending: true }),
 
-        supabase
-          .from('test_categories')
-          .select('test_id, category_id'),
-      ]);
+          supabase
+            .from('test_categories')
+            .select('test_id, category_id'),
+        ]);
 
       if (cancelled) return;
 
-      if (testsResult.error || categoriesResult.error || linksResult.error) {
+      if (
+        testsResult.error ||
+        categoriesResult.error ||
+        linksResult.error
+      ) {
         console.error('Supabase catalogue error:', {
           tests: testsResult.error,
           categories: categoriesResult.error,
@@ -84,12 +86,14 @@ export function TestsPage() {
         return;
       }
 
+      // Map category IDs to category names
       const categoryNames = new Map<string, string>();
 
       for (const item of categoriesResult.data ?? []) {
         categoryNames.set(item.id, item.name);
       }
 
+      // Map test IDs to their associated categories
       const linksByTest = new Map<string, string[]>();
 
       for (const link of linksResult.data ?? []) {
@@ -106,22 +110,26 @@ export function TestsPage() {
         linksByTest.set(link.test_id, existing);
       }
 
-      const mappedTests: LabTest[] = (testsResult.data ?? []).map((test) => {
-        const linkedCategories = linksByTest.get(test.id) ?? [];
+      // Convert Supabase records into LabTest objects
+      const mappedTests: LabTest[] = (testsResult.data ?? []).map(
+        (test) => {
+          const linkedCategories =
+            linksByTest.get(test.id) ?? [];
 
-        return {
-          id: test.id,
-          name: test.name,
-          category: linkedCategories[0] ?? 'Other',
-          categories: linkedCategories,
-          price: Number(test.selling_price),
-          prep: 'Preparation details available on enquiry',
-          turnaround:
-            test.report_turnaround_hours == null
-              ? 'To be confirmed'
-              : `${test.report_turnaround_hours} hours`,
-        };
-      });
+          return {
+            id: test.id,
+            name: test.name,
+            category: linkedCategories[0] ?? 'Other',
+            categories: linkedCategories,
+            price: Number(test.selling_price),
+            prep: 'Preparation details available on enquiry',
+            turnaround:
+              test.report_turnaround_hours == null
+                ? 'To be confirmed'
+                : `${test.report_turnaround_hours} hours`,
+          };
+        },
+      );
 
       setTests(mappedTests);
       setIsLoading(false);
@@ -135,15 +143,32 @@ export function TestsPage() {
   }, []);
 
   // Build filter categories from Supabase data
-  const testCategories = useMemo(
-    () => [
-      'All',
-      ...Array.from(
-        new Set(tests.flatMap((test) => test.categories ?? [test.category])),
+  const testCategories = useMemo(() => {
+    const hiddenCategories = [
+      'Blood',
+      'Recovery',
+      'Additional Info & Vitamins',
+      'Gut',
+    ];
+
+    const availableCategories = Array.from(
+      new Set(
+        tests.flatMap((test) =>
+          test.categories ?? [test.category],
+        ),
       ),
-    ],
-    [tests],
-  );
+    ).filter(
+      (item) => !hiddenCategories.includes(item),
+    );
+
+    return [
+      'All',
+      'Fever',
+      ...availableCategories.filter(
+        (item) => item !== 'Fever',
+      ),
+    ];
+  }, [tests]);
 
   // Search and category filtering
   const filteredTests = useMemo(
@@ -151,8 +176,12 @@ export function TestsPage() {
       tests.filter(
         (test) =>
           (category === 'All' ||
-            (test.categories ?? [test.category]).includes(category)) &&
-          test.name.toLowerCase().includes(query.trim().toLowerCase()),
+            (test.categories ?? [test.category]).includes(
+              category,
+            )) &&
+          test.name
+            .toLowerCase()
+            .includes(query.trim().toLowerCase()),
       ),
     [tests, query, category],
   );
@@ -167,64 +196,50 @@ export function TestsPage() {
       />
 
       <section className="mx-auto max-w-[1240px] px-5 py-12 lg:px-8">
-        <div className="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
-          {/* Search input */}
-          <div className="relative flex-1">
-            <Search
-              size={18}
-              className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-            />
+        {/* Category filter section */}
+        <div className="card mx-auto w-full max-w-[1100px] p-4">
+          <div
+            className="grid grid-cols-2 justify-items-center gap-3 sm:grid-cols-3 lg:grid-cols-5"
+            role="group"
+            aria-label="Filter by category"
+          >
+            {testCategories.map((item) => {
+              const CategoryIcon =
+                categoryIcons[item] ?? FlaskConical;
 
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search by test name"
-              aria-label="Search tests"
-              className="input !border-transparent !bg-canvas !pl-11"
-            />
+              const isSelected = category === item;
+
+              return (
+                <button
+                  key={item}
+                  onClick={() => setCategory(item)}
+                  aria-pressed={isSelected}
+                  className={`flex min-h-[115px] w-full max-w-[220px] flex-col items-center justify-center gap-3 rounded-2xl border p-4 text-center transition duration-200 hover:-translate-y-1 hover:shadow-md ${
+                    isSelected
+                      ? 'border-brand-blue-700 bg-brand-blue-700 text-white shadow-md'
+                      : 'border-line bg-white text-brand-blue-700 hover:border-brand-teal-400 hover:bg-brand-teal-50'
+                  }`}
+                >
+                  <CategoryIcon
+                    size={32}
+                    strokeWidth={1.8}
+                  />
+
+                  <span className="text-xs font-semibold leading-snug sm:text-sm">
+                    {item}
+                  </span>
+                </button>
+              );
+            })}
           </div>
-
-          {/* Category filter buttons with icons */}
-          
-{/* Category filter tiles with large icons */}
-<div
-  className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"
-  role="group"
-  aria-label="Filter by category"
->
-  {testCategories.map((item) => {
-    const CategoryIcon = categoryIcons[item] ?? FlaskConical;
-    const isSelected = category === item;
-
-    return (
-      <button
-        key={item}
-        onClick={() => setCategory(item)}
-        aria-pressed={isSelected}
-        className={`flex min-h-[115px] flex-col items-center justify-center gap-3 rounded-2xl border p-4 text-center transition duration-200 hover:-translate-y-1 hover:shadow-md ${
-          isSelected
-            ? 'border-brand-blue-700 bg-brand-blue-700 text-white shadow-md'
-            : 'border-line bg-white text-brand-blue-700 hover:border-brand-teal-400 hover:bg-brand-teal-50'
-        }`}
-      >
-        <CategoryIcon
-          size={32}
-          strokeWidth={1.8}
-        />
-
-        <span className="text-xs font-semibold leading-snug sm:text-sm">
-          {item}
-        </span>
-      </button>
-    );
-  })}
-</div>
-
         </div>
 
         {/* Loading state */}
         {isLoading ? (
-          <div className="py-20 text-center text-sm text-muted" role="status">
+          <div
+            className="py-20 text-center text-sm text-muted"
+            role="status"
+          >
             Loading diagnostic tests...
           </div>
         ) : error ? (
@@ -239,13 +254,19 @@ export function TestsPage() {
           /* Test cards */
           <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {filteredTests.map((test) => (
-              <TestCard key={test.id} test={test} />
+              <TestCard
+                key={test.id}
+                test={test}
+              />
             ))}
           </div>
         ) : (
           /* Empty search state */
           <div className="card mt-8 flex flex-col items-center py-20 text-center">
-            <SearchX size={36} className="text-brand-teal-400" />
+            <SearchX
+              size={36}
+              className="text-brand-teal-400"
+            />
 
             <p className="mt-4 font-bold text-ink">
               No tests match your search

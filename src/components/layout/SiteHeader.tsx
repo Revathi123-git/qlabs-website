@@ -49,7 +49,7 @@ export function SiteHeader() {
             {SITE_CONTACT.phones[0]}
           </a>
           <button onClick={() => openBooking()} className="btn-primary !px-5 !py-3">
-            Book a test
+            Search Tests
             <ArrowRight size={16} />
           </button>
         </div>
