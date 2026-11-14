@@ -1,5 +1,3 @@
-export type TestCategory = 'Routine' | 'Diabetes' | 'Heart health' | 'Hormones' | 'Vitamins';
-
 export type TestCategory = string;
 
 export interface LabTest {
@@ -10,19 +8,9 @@ export interface LabTest {
   price: number;
   prep: string;
   turnaround: string;
+  sampleType?: string | null;
   featured?: boolean;
 }
-
-export interface HealthPackage {
-  id: string;
-  title: string;
-  description: string;
-  testCount: number;
-  price: number;
-  originalPrice?: number;
-  highlights: string[];
-}
-
 export interface Faq {
   question: string;
   answer: string;
