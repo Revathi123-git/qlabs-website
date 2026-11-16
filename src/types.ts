@@ -1,3 +1,4 @@
+
 export type TestCategory = string;
 
 export interface LabTest {
@@ -10,7 +11,19 @@ export interface LabTest {
   turnaround: string;
   sampleType?: string | null;
   featured?: boolean;
+  imagePath?: string | null;
 }
+
+export interface HealthPackage {
+  id: string;
+  title: string;
+  description: string;
+  testCount: number;
+  price: number;
+  originalPrice?: number;
+  highlights: string[];
+}
+
 export interface Faq {
   question: string;
   answer: string;

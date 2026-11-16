@@ -61,9 +61,9 @@ export function TestsPage() {
         await Promise.all([
           supabase
             .from('tests')
-            .select(
-              'id, name, selling_price, report_turnaround_hours, sample_type, display_order',
-            )
+           .select(
+  'id, name, selling_price, report_turnaround_hours, sample_type, display_order, image_path',
+)
             .eq('is_active', true)
             .order('display_order', { ascending: true }),
 
@@ -133,6 +133,13 @@ export function TestsPage() {
         return {
           id: test.id,
           name: test.name,
+          imagePath: test.image_path
+    ? test.image_path.startsWith('http')
+      ? test.image_path
+      : supabase.storage
+          .from('catalogue-images')
+          .getPublicUrl(test.image_path).data.publicUrl
+    : null,
           category: linkedCategories[0] ?? 'Other',
           categories: linkedCategories,
           price: Number(test.selling_price),

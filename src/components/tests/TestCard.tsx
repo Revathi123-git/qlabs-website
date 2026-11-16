@@ -8,21 +8,34 @@ export function TestCard({ test }: { test: LabTest }) {
 
   return (
     <article className="group card flex flex-col p-6 transition duration-300 hover:-translate-y-1 hover:border-brand-teal-200 hover:shadow-lift">
-      <div className="flex items-start justify-between gap-3">
-        <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-teal-50 text-brand-teal-500 transition group-hover:bg-brand-teal-500 group-hover:text-white">
-          <FlaskConical size={20} />
-        </span>
 
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-teal-50 px-3 py-1.5 text-[11px] font-semibold text-brand-teal-700">
+      {/* TEST IMAGE */}
+      <div className="relative h-40 w-full overflow-hidden rounded-xl bg-brand-teal-50">
+        {test.imagePath ? (
+          <img
+            src={test.imagePath}
+            alt={test.name}
+            loading="lazy"
+            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-brand-teal-500">
+            <FlaskConical size={42} />
+          </div>
+        )}
+
+        <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-semibold text-brand-teal-700 shadow-sm">
           <FlaskConical size={13} />
           {test.category}
         </span>
       </div>
 
+      {/* TEST NAME */}
       <h3 className="mt-5 text-base font-bold leading-snug text-ink">
         {test.name}
       </h3>
 
+      {/* TEST DETAILS */}
       <dl className="mt-4 space-y-3 text-xs text-muted">
 
         <div className="flex items-center gap-2">
@@ -39,6 +52,7 @@ export function TestCard({ test }: { test: LabTest }) {
 
       </dl>
 
+      {/* PRICE AND BOOKING */}
       <div className="mt-auto flex items-center justify-between border-t border-line pt-5">
         <p className="text-2xl font-bold text-brand-blue-700">
           ₹{test.price.toLocaleString('en-IN')}
@@ -52,6 +66,7 @@ export function TestCard({ test }: { test: LabTest }) {
           <ArrowRight size={15} />
         </button>
       </div>
+
     </article>
   );
 }

@@ -11,6 +11,7 @@ import { ReportsPage } from '@/pages/ReportsPage';
 import { ContactPage } from '@/pages/ContactPage';
 import { TermsPage } from '@/pages/TermsPage';
 import { TestsPage } from '@/pages/TestsPage';
+import { AdminTestsPage } from '@/pages/AdminTestsPage';
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
           </Route>
           <Route element={<AdminLayout />}>
             <Route path="admin" element={<AdminPage />} />
+            <Route path="admin/tests" element={<AdminTestsPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
