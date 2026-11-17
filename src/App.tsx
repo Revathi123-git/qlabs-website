@@ -12,7 +12,7 @@ import { ContactPage } from '@/pages/ContactPage';
 import { TermsPage } from '@/pages/TermsPage';
 import { TestsPage } from '@/pages/TestsPage';
 import { AdminTestsPage } from '@/pages/AdminTestsPage';
-
+import { AdminPackagesPage } from '@/pages/AdminPackagesPage';
 function App() {
   return (
     <BrowserRouter>
@@ -28,10 +28,11 @@ function App() {
             <Route path="contact" element={<ContactPage />} />
             <Route path="terms" element={<TermsPage />} />
           </Route>
-          <Route element={<AdminLayout />}>
-            <Route path="admin" element={<AdminPage />} />
-            <Route path="admin/tests" element={<AdminTestsPage />} />
-          </Route>
+         <Route element={<AdminLayout />}>
+  <Route path="admin" element={<AdminPage />} />
+  <Route path="admin/tests" element={<AdminTestsPage />} />
+  <Route path="admin/packages" element={<AdminPackagesPage />} />
+</Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BookingProvider>

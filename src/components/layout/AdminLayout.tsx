@@ -274,6 +274,13 @@ export function AdminLayout() {
   Manage Tests
 </Link>
 
+<Link
+  to="/admin/packages"
+  className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm font-medium text-[#17324D] hover:border-[#079C83] hover:text-[#079C83]"
+>
+  Manage Packages
+</Link>
+
             <Link
               to="/"
               className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm font-medium text-[#17324D] hover:border-[#079C83]"

@@ -10,6 +10,7 @@ export interface LabTest {
   prep: string;
   turnaround: string;
   sampleType?: string | null;
+  shortDescription?: string | null;
   featured?: boolean;
   imagePath?: string | null;
 }
@@ -22,6 +23,7 @@ export interface HealthPackage {
   price: number;
   originalPrice?: number;
   highlights: string[];
+  imagePath?: string | null;
 }
 
 export interface Faq {

@@ -35,6 +35,13 @@ export function TestCard({ test }: { test: LabTest }) {
         {test.name}
       </h3>
 
+      {/* SHORT DESCRIPTION */}
+      {test.shortDescription?.trim() && (
+        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted">
+          {test.shortDescription}
+        </p>
+      )}
+
       {/* TEST DETAILS */}
       <dl className="mt-4 space-y-3 text-xs text-muted">
 

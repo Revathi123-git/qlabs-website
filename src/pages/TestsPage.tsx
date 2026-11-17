@@ -61,9 +61,13 @@ export function TestsPage() {
         await Promise.all([
           supabase
             .from('tests')
-           .select(
-  'id, name, selling_price, report_turnaround_hours, sample_type, display_order, image_path',
+           
+
+.select(
+  'id, name, description, selling_price, report_turnaround_hours, sample_type, display_order, image_path',
 )
+
+
             .eq('is_active', true)
             .order('display_order', { ascending: true }),
 
@@ -133,6 +137,7 @@ export function TestsPage() {
         return {
           id: test.id,
           name: test.name,
+shortDescription: test.description,
           imagePath: test.image_path
     ? test.image_path.startsWith('http')
       ? test.image_path

@@ -6,6 +6,43 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { supabase } from '@/lib/supabase';
 import type { HealthPackage } from '@/types';
 
+interface PackageRow {
+  id: string;
+  package_name: string;
+  description: string | null;
+  price: number;
+  display_order: number;
+  image_path: string | null;
+}
+
+interface PackageItemRow {
+  package_id: string;
+  test_id: string | null;
+  display_name: string;
+  display_order: number;
+}
+
+interface TestRow {
+  id: string;
+  name: string;
+}
+
+function getPackageImageUrl(imagePath: string | null): string | null {
+  if (!imagePath) return null;
+
+  // Support an already complete image URL.
+  if (/^https?:\/\//i.test(imagePath)) {
+    return imagePath;
+  }
+
+  // Resolve a Supabase Storage path.
+  const { data } = supabase.storage
+    .from('catalogue-images')
+    .getPublicUrl(imagePath);
+
+  return data.publicUrl;
+}
+
 export function PackagesPage() {
   const [packages, setPackages] = useState<HealthPackage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,69 +55,129 @@ export function PackagesPage() {
       setIsLoading(true);
       setError(null);
 
-      const [packagesResult, itemsResult] = await Promise.all([
-        supabase
+      try {
+        // 1. Fetch active packages.
+        const { data: packageData, error: packageError } = await supabase
           .from('test_packages')
           .select(
-            'id, package_name, description, price, tests_included, display_order',
+            'id, package_name, description, price, display_order, image_path',
           )
           .eq('is_active', true)
-          .order('display_order', { ascending: true }),
+          .order('display_order', { ascending: true });
 
-        supabase
+        if (packageError) throw packageError;
+
+        if (cancelled) return;
+
+        const packageRows = (packageData ?? []) as PackageRow[];
+
+        // No active packages.
+        if (packageRows.length === 0) {
+          setPackages([]);
+          setIsLoading(false);
+          return;
+        }
+
+        const packageIds = packageRows.map((pkg) => pkg.id);
+
+        // 2. Fetch contents belonging to these packages.
+        const { data: itemData, error: itemError } = await supabase
           .from('package_items')
-          .select('package_id, display_name, display_order')
-          .order('display_order', { ascending: true }),
-      ]);
+          .select('package_id, test_id, display_name, display_order')
+          .in('package_id', packageIds)
+          .order('display_order', { ascending: true });
 
-      if (cancelled) return;
+        if (itemError) throw itemError;
 
-      if (packagesResult.error || itemsResult.error) {
-        console.error('Supabase packages error:', {
-          packages: packagesResult.error,
-          items: itemsResult.error,
+        if (cancelled) return;
+
+        const packageItems = (itemData ?? []) as PackageItemRow[];
+
+        // 3. Fetch linked individual test information.
+        // Grouped/custom items have test_id = null and need no test lookup.
+        const testIds = [
+          ...new Set(
+            packageItems
+              .map((item) => item.test_id)
+              .filter((id): id is string => Boolean(id)),
+          ),
+        ];
+
+        let testRows: TestRow[] = [];
+
+        if (testIds.length > 0) {
+          const { data: testData, error: testError } = await supabase
+            .from('tests')
+            .select('id, name')
+            .in('id', testIds);
+
+          if (testError) throw testError;
+
+          testRows = (testData ?? []) as TestRow[];
+        }
+
+        if (cancelled) return;
+
+        // 4. Create a lookup for linked tests.
+        const testsById = new Map(
+          testRows.map((test) => [test.id, test]),
+        );
+
+        // 5. Group package contents by package ID.
+        const itemsByPackage = new Map<string, string[]>();
+
+        for (const item of packageItems) {
+          let displayName: string;
+
+          if (item.test_id) {
+            // Individual test: use the linked test's actual name.
+            const linkedTest = testsById.get(item.test_id);
+
+            displayName = linkedTest?.name || item.display_name;
+          } else {
+            // Grouped/custom entry: use display_name directly.
+            displayName = item.display_name;
+          }
+
+          const existingItems =
+            itemsByPackage.get(item.package_id) ?? [];
+
+          existingItems.push(displayName);
+          itemsByPackage.set(item.package_id, existingItems);
+        }
+
+        // 6. Convert database records into the existing HealthPackage type.
+        const mappedPackages: HealthPackage[] = packageRows.map((pkg) => {
+          const highlights = itemsByPackage.get(pkg.id) ?? [];
+
+          return {
+            id: pkg.id,
+            title: pkg.package_name,
+            description:
+              pkg.description ?? 'A curated group of diagnostic tests.',
+            testCount: highlights.length,
+            price: Number(pkg.price),
+            highlights,
+            imagePath: getPackageImageUrl(pkg.image_path),
+          };
         });
 
-        setError(
-          'We could not load health packages. Please try again shortly.',
-        );
-        setIsLoading(false);
-        return;
+        if (cancelled) return;
+
+        setPackages(mappedPackages);
+      } catch (err) {
+        console.error('Supabase packages loading error:', err);
+
+        if (!cancelled) {
+          setError(
+            'We could not load health packages. Please try again shortly.',
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
-
-      // Group package items by package ID
-      const itemsByPackage = new Map<string, string[]>();
-
-      for (const item of itemsResult.data ?? []) {
-        const existing = itemsByPackage.get(item.package_id) ?? [];
-
-        existing.push(item.display_name);
-
-        itemsByPackage.set(item.package_id, existing);
-      }
-
-      // Convert Supabase records into the existing HealthPackage format
-      const mappedPackages: HealthPackage[] = (
-        packagesResult.data ?? []
-      ).map((pkg) => {
-        const highlights =
-          itemsByPackage.get(pkg.id) ??
-          pkg.tests_included ??
-          [];
-
-        return {
-          id: pkg.id,
-          title: pkg.package_name,
-          description:
-            pkg.description ?? 'A curated group of diagnostic tests.',
-          testCount: highlights.length,
-          price: Number(pkg.price),
-          highlights,
-        };
-      });
-
-      setPackages(mappedPackages);
-      setIsLoading(false);
     }
 
     loadPackages();
@@ -99,10 +196,12 @@ export function PackagesPage() {
       />
 
       <section className="mx-auto max-w-[1240px] px-5 py-16 lg:px-8">
-
         {/* Loading state */}
         {isLoading ? (
-          <div className="py-20 text-center text-sm text-muted" role="status">
+          <div
+            className="py-20 text-center text-sm text-muted"
+            role="status"
+          >
             Loading health packages...
           </div>
         ) : error ? (
@@ -114,7 +213,7 @@ export function PackagesPage() {
             {error}
           </div>
         ) : packages.length > 0 ? (
-          /* Supabase packages */
+          /* Active Supabase packages */
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {packages.map((pkg) => (
               <PackageCard key={pkg.id} pkg={pkg} />
