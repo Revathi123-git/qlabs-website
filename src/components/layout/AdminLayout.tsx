@@ -1,10 +1,16 @@
 
 import { useEffect, useState, type FormEvent } from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import type { Session } from '@supabase/supabase-js';
+
 import { supabase } from '@/lib/supabase';
 
+import { AdminPage } from '@/pages/AdminPage';
+import { AdminTestsPage } from '@/pages/AdminTestsPage';
+import { AdminPackagesPage } from '@/pages/AdminPackagesPage';
+
 export function AdminLayout() {
+
   const [session, setSession] = useState<Session | null>(null);
   const [checkingSession, setCheckingSession] = useState(true);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
@@ -14,6 +20,30 @@ export function AdminLayout() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const location = useLocation();
+  const currentPath = location.pathname;
+  const userId = session?.user.id;
+
+  // Admin pages that should remain mounted after first visit.
+  const adminPaths = ['/admin', '/admin/tests', '/admin/packages'];
+
+  const [visitedPages, setVisitedPages] = useState<string[]>(() =>
+    adminPaths.includes(location.pathname)
+      ? [location.pathname]
+      : ['/admin']
+  );
+
+  // Remember each visited page without unmounting previously visited pages.
+  useEffect(() => {
+    if (adminPaths.includes(currentPath)) {
+      setVisitedPages((previous) =>
+        previous.includes(currentPath)
+          ? previous
+          : [...previous, currentPath]
+      );
+    }
+  }, [currentPath]);
 
   // Restore the existing login session and listen for login/logout changes.
   useEffect(() => {
@@ -46,12 +76,13 @@ export function AdminLayout() {
     };
   }, []);
 
-  // Verify that the signed-in user is registered in admin_users.
+  // Verify administrator access only when the signed-in user changes.
+  // Token refreshes for the same user will not repeat this check.
   useEffect(() => {
     let active = true;
 
     async function verifyAdmin() {
-      if (!session) {
+      if (!userId) {
         setIsAdmin(false);
         setCheckingAdmin(false);
         return;
@@ -62,14 +93,16 @@ export function AdminLayout() {
       const { data, error } = await supabase
         .from('admin_users')
         .select('user_id')
-        .eq('user_id', session.user.id)
+        .eq('user_id', userId)
         .maybeSingle();
 
       if (!active) return;
 
       if (error) {
         setIsAdmin(false);
-        setError(`Unable to verify administrator access: ${error.message}`);
+        setError(
+          `Unable to verify administrator access: ${error.message}`
+        );
       } else {
         setIsAdmin(Boolean(data));
       }
@@ -82,10 +115,12 @@ export function AdminLayout() {
     return () => {
       active = false;
     };
-  }, [session]);
+  }, [userId]);
 
+  // Admin login.
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     setLoading(true);
     setError('');
 
@@ -101,6 +136,7 @@ export function AdminLayout() {
     setLoading(false);
   }
 
+  // Admin logout.
   async function handleLogout() {
     setError('');
 
@@ -111,11 +147,13 @@ export function AdminLayout() {
     }
   }
 
+  // Session and administrator verification loading screen.
   if (checkingSession || (session && checkingAdmin)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#F6FAFB]">
         <div className="text-center">
           <div className="mx-auto h-9 w-9 animate-spin rounded-full border-4 border-[#E2E8F0] border-t-[#079C83]" />
+
           <p className="mt-4 text-sm text-[#64748B]">
             Checking administrator access...
           </p>
@@ -258,6 +296,7 @@ export function AdminLayout() {
             <Link to="/admin" className="text-xl font-bold text-[#064568]">
               Q Labs <span className="text-[#079C83]">Admin</span>
             </Link>
+
             <p className="mt-1 text-xs text-[#64748B]">
               Diagnostics website management
             </p>
@@ -267,19 +306,20 @@ export function AdminLayout() {
             <span className="max-w-[220px] truncate text-sm text-[#64748B]">
               {session.user.email}
             </span>
-            <Link
-  to="/admin/tests"
-  className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm font-medium text-[#17324D] hover:border-[#079C83] hover:text-[#079C83]"
->
-  Manage Tests
-</Link>
 
-<Link
-  to="/admin/packages"
-  className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm font-medium text-[#17324D] hover:border-[#079C83] hover:text-[#079C83]"
->
-  Manage Packages
-</Link>
+            <Link
+              to="/admin/tests"
+              className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm font-medium text-[#17324D] hover:border-[#079C83] hover:text-[#079C83]"
+            >
+              Manage Tests
+            </Link>
+
+            <Link
+              to="/admin/packages"
+              className="rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm font-medium text-[#17324D] hover:border-[#079C83] hover:text-[#079C83]"
+            >
+              Manage Packages
+            </Link>
 
             <Link
               to="/"
@@ -299,8 +339,25 @@ export function AdminLayout() {
         </div>
       </header>
 
+      {/* Keep visited pages mounted to preserve their local form state. */}
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <Outlet />
+        {visitedPages.includes('/admin') && (
+          <div hidden={currentPath !== '/admin'}>
+            <AdminPage />
+          </div>
+        )}
+
+        {visitedPages.includes('/admin/tests') && (
+          <div hidden={currentPath !== '/admin/tests'}>
+            <AdminTestsPage />
+          </div>
+        )}
+
+        {visitedPages.includes('/admin/packages') && (
+          <div hidden={currentPath !== '/admin/packages'}>
+            <AdminPackagesPage />
+          </div>
+        )}
       </main>
     </div>
   );

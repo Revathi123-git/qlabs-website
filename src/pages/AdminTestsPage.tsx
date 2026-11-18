@@ -98,6 +98,7 @@ function formatPrice(value: number | null | undefined) {
 }
 
 export function AdminTestsPage() {
+
   const [tests, setTests] = useState<TestRecord[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [testCategoryLinks, setTestCategoryLinks] = useState<TestCategoryLink[]>([]);

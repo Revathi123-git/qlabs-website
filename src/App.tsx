@@ -1,23 +1,25 @@
+
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { BookingProvider } from '@/context/BookingProvider';
+
 import { AdminLayout } from '@/components/layout/AdminLayout';
 import { PublicLayout } from '@/components/layout/PublicLayout';
-import { AboutPage } from '@/pages/AboutPage';
-import { AdminPage } from '@/pages/AdminPage';
+
 import { HomePage } from '@/pages/HomePage';
-import { LocationsPage } from '@/pages/LocationsPage';
+import { TestsPage } from '@/pages/TestsPage';
 import { PackagesPage } from '@/pages/PackagesPage';
+import { AboutPage } from '@/pages/AboutPage';
+import { LocationsPage } from '@/pages/LocationsPage';
 import { ReportsPage } from '@/pages/ReportsPage';
 import { ContactPage } from '@/pages/ContactPage';
 import { TermsPage } from '@/pages/TermsPage';
-import { TestsPage } from '@/pages/TestsPage';
-import { AdminTestsPage } from '@/pages/AdminTestsPage';
-import { AdminPackagesPage } from '@/pages/AdminPackagesPage';
+
 function App() {
   return (
     <BrowserRouter>
       <BookingProvider>
         <Routes>
+          {/* Public website routes */}
           <Route element={<PublicLayout />}>
             <Route index element={<HomePage />} />
             <Route path="tests" element={<TestsPage />} />
@@ -28,11 +30,11 @@ function App() {
             <Route path="contact" element={<ContactPage />} />
             <Route path="terms" element={<TermsPage />} />
           </Route>
-         <Route element={<AdminLayout />}>
-  <Route path="admin" element={<AdminPage />} />
-  <Route path="admin/tests" element={<AdminTestsPage />} />
-  <Route path="admin/packages" element={<AdminPackagesPage />} />
-</Route>
+
+          {/* Admin routes - AdminLayout manages all admin pages */}
+          <Route path="admin/*" element={<AdminLayout />} />
+
+          {/* Redirect unknown routes to the homepage */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BookingProvider>
