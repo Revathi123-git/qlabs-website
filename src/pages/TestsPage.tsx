@@ -1,5 +1,5 @@
-
 import { useEffect, useMemo, useState } from 'react';
+
 import {
   Search,
   SearchX,
@@ -13,8 +13,10 @@ import {
   FlaskConical,
   ChevronLeft,
   ChevronRight,
+  ArrowRight,
 } from 'lucide-react';
 
+import { useBooking } from '@/context/booking-context';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { TestCard } from '@/components/tests/TestCard';
 import { IMAGES } from '@/data/mock-data';
@@ -29,6 +31,7 @@ type Category = {
 const TESTS_PER_PAGE = 9;
 
 export function TestsPage() {
+  const { openBooking } = useBooking();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
   const [currentPage, setCurrentPage] = useState(0);
@@ -326,10 +329,22 @@ shortDescription: test.description,
             </aside>
 
             {/* MAIN TEST AREA */}
-            <div className="min-w-0">
+            {/* MAIN TEST AREA */}
+<div className="min-w-0">
 
-              {/* SEARCH BAR */}
-              <div className="card mb-6 p-4 sm:p-5">
+  {/* BOOK A TEST BUTTON - RIGHT CORNER */}
+  <div className="mb-4 flex justify-end">
+    <button
+      onClick={() => openBooking()}
+      className="btn-primary"
+    >
+      Book a test
+      <ArrowRight size={16} />
+    </button>
+  </div>
+
+  {/* SEARCH BAR */}
+  <div className="card mb-6 p-4 sm:p-5">
                 <div className="relative">
                   <Search
                     size={19}
