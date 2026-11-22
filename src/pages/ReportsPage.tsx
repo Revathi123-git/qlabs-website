@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Download, FileText, Lock, Search } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
-
+import { usePageSEO } from '@/lib/usePageSEO';
 interface SampleReport {
   id: string;
   name: string;
@@ -22,6 +22,14 @@ const SAMPLE_REPORT: SampleReport = {
 };
 
 export function ReportsPage() {
+
+
+    usePageSEO({
+    title: 'Download Lab Test Reports Online | Q Labs Diagnostics',
+    description:
+      'Access your Q Labs Diagnostics lab test reports online using your report details. For assistance, contact our support team.',
+    path: '/reports',
+  });
   const [reportId, setReportId] = useState('');
   const [mobile, setMobile] = useState('');
   const [errors, setErrors] = useState<{ reportId?: string; mobile?: string }>({});

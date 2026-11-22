@@ -5,6 +5,7 @@ import { PackageCard } from '@/components/packages/PackageCard';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { supabase } from '@/lib/supabase';
 import type { HealthPackage } from '@/types';
+import { usePageSEO } from '@/lib/usePageSEO';
 
 interface PackageRow {
   id: string;
@@ -44,6 +45,12 @@ function getPackageImageUrl(imagePath: string | null): string | null {
 }
 
 export function PackagesPage() {
+    usePageSEO({
+    title: 'Health Checkup Packages in Hyderabad | Q Labs Diagnostics',
+    description:
+      'Explore health checkup packages in Hyderabad from Q Labs Diagnostics. Compare package details, included tests and prices, and book convenient home sample collection.',
+    path: '/packages',
+  });
   const [packages, setPackages] = useState<HealthPackage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

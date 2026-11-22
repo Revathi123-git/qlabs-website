@@ -2,9 +2,15 @@ import { ArrowUpRight, Clock3, MapPin, Phone } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { BRANCHES, SITE_CONTACT } from '@/data/mock-data';
 import { toTelHref } from '@/lib/phone';
-
+import { usePageSEO } from '@/lib/usePageSEO';
 
 export function LocationsPage() {
+    usePageSEO({
+    title: 'Home Sample Collection in Hyderabad | Q Labs Diagnostics',
+    description:
+      'Find Q Labs Diagnostics service locations and arrange convenient home sample collection for diagnostic blood tests in Hyderabad.',
+    path: '/locations',
+  });
   return (
     <main>
       <PageHeader

@@ -5,7 +5,7 @@ import { FormField } from '@/components/ui/FormField';
 import { SITE_CONTACT } from '@/data/mock-data';
 import { toTelHref } from '@/lib/phone';
 import { supabase } from '@/lib/supabase';
-
+import { usePageSEO } from '@/lib/usePageSEO';
 interface EnquiryForm {
   fullName: string;
   mobile: string;
@@ -17,6 +17,12 @@ type EnquiryErrors = Partial<Record<keyof EnquiryForm, string>>;
 const EMPTY_FORM: EnquiryForm = { fullName: '', mobile: '', email: '' };
 
 export function ContactPage() {
+    usePageSEO({
+    title: 'Contact Q Labs Diagnostics | Book Lab Tests in Hyderabad',
+    description:
+      'Contact Q Labs Diagnostics for diagnostic test bookings, health packages, report support and home sample collection in Hyderabad.',
+    path: '/contact',
+  });
   const [form, setForm] = useState<EnquiryForm>(EMPTY_FORM);
   const [errors, setErrors] = useState<EnquiryErrors>({});
   const [isSubmitted, setIsSubmitted] = useState(false);

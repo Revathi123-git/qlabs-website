@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { usePageSEO } from '@/lib/usePageSEO';
 import {
   ArrowRight,
   CalendarCheck,
@@ -92,6 +93,12 @@ function formatTurnaround(hours?: number | null): string {
 }
 
 export function HomePage() {
+    usePageSEO({
+    title: 'Q Labs Diagnostics | Lab Tests & Home Collection in Hyderabad',
+    description:
+      'Book diagnostic blood tests, health packages and convenient home sample collection in Hyderabad with Q Labs Diagnostics. Explore tests, prices and easy online booking.',
+    path: '/',
+  });
   const { openBooking } = useBooking();
 
   const [featuredTests, setFeaturedTests] = useState<LabTest[]>([]);

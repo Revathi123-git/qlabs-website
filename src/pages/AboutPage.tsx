@@ -1,6 +1,7 @@
 import { Award, ShieldCheck, Users } from 'lucide-react';
 import { IMAGES } from '@/data/mock-data';
 import type { ReactNode } from 'react';
+import { usePageSEO } from '@/lib/usePageSEO';
 
 const VALUES = [
   { title: 'Quality without compromise', copy: 'Every sample follows a documented chain of care and is reviewed with precision.', icon: ShieldCheck },
@@ -15,6 +16,12 @@ const STATS = [
 ];
 
 export function AboutPage() {
+    usePageSEO({
+    title: 'About Q Labs Diagnostics | Diagnostic Lab Services in Hyderabad',
+    description:
+      'Learn about Q Labs Diagnostics, our diagnostic services, health checkup options and convenient home sample collection in Hyderabad.',
+    path: '/about',
+  });
   return (
     <main>
       <section className="bg-white">

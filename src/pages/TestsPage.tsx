@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import { usePageSEO } from '@/lib/usePageSEO';
 
 import {
   Search,
@@ -31,8 +32,14 @@ type Category = {
 const TESTS_PER_PAGE = 9;
 
 export function TestsPage() {
+
+    usePageSEO({
+    title: 'Diagnostic Lab Tests in Hyderabad | Q Labs Diagnostics',
+    description:
+      'Explore diagnostic blood tests, test prices, sample types and report turnaround times. Book convenient home sample collection in Hyderabad with Q Labs Diagnostics.',
+    path: '/tests',
+  });
   const { openBooking } = useBooking();
-  
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
   const [currentPage, setCurrentPage] = useState(0);

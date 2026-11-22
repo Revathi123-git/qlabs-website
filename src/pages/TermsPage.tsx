@@ -1,7 +1,13 @@
 import { PageHeader } from '@/components/layout/PageHeader';
 import { TERMS_EFFECTIVE_DATE, TERMS_INTRO, TERMS_SECTIONS } from '@/data/terms-content';
-
+import { usePageSEO } from '@/lib/usePageSEO';
 export function TermsPage() {
+    usePageSEO({
+    title: 'Terms and Conditions | Q Labs Diagnostics',
+    description:
+      'Read the terms and conditions for using Q Labs Diagnostics online services and booking diagnostic tests.',
+    path: '/terms',
+  });
   return (
     <main>
       <PageHeader
