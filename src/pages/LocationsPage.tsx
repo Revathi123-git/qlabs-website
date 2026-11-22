@@ -3,7 +3,6 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { BRANCHES, SITE_CONTACT } from '@/data/mock-data';
 import { toTelHref } from '@/lib/phone';
 
-const MAP_PINS = [{ label: 'Q Labs Shaikpet', top: '48%', left: '50%' }];
 
 export function LocationsPage() {
   return (
@@ -15,21 +14,21 @@ export function LocationsPage() {
       />
 
       <section className="mx-auto grid max-w-[1240px] gap-8 px-5 py-14 lg:grid-cols-[1.1fr_.9fr] lg:px-8">
-        <div className="relative min-h-[460px] overflow-hidden rounded-3xl border border-brand-teal-100 bg-gradient-to-br from-brand-teal-50 via-white to-brand-blue-50" role="img" aria-label="Map showing the Q Labs centre in Shaikpet, Hyderabad">
-          <div className="absolute inset-0 opacity-60" style={{ backgroundImage: 'linear-gradient(to right, #D5E8EF 1px, transparent 1px), linear-gradient(to bottom, #D5E8EF 1px, transparent 1px)', backgroundSize: '48px 48px' }} aria-hidden="true" />
-          {MAP_PINS.map((pin) => (
-            <div key={pin.label} className="absolute -translate-x-1/2 -translate-y-full" style={{ top: pin.top, left: pin.left }}>
-              <div className="flex items-center gap-2 whitespace-nowrap rounded-full bg-white px-3 py-1.5 text-xs font-bold text-brand-blue-700 shadow-card">
-                <MapPin size={14} className="text-brand-teal-500" />
-                {pin.label}
-              </div>
-              <div className="mx-auto h-3 w-3 rounded-full border-2 border-white bg-brand-teal-500 shadow-md" />
-            </div>
-          ))}
-          <p className="absolute bottom-5 left-5 rounded-xl bg-white/90 px-4 py-2.5 text-xs font-semibold text-muted backdrop-blur">
-            Interactive map coming soon
-          </p>
-        </div>
+        
+<div className="relative min-h-[460px] overflow-hidden rounded-3xl border border-brand-teal-100 bg-white shadow-sm">
+  <iframe
+    title="Q Labs Diagnostics Location - Shaikpet, Hyderabad"
+    src="https://www.google.com/maps?q=Q+Labs+Diagnostics,+Shaikpet,+Hyderabad&output=embed"
+    width="100%"
+    height="460"
+    style={{ border: 0 }}
+    allowFullScreen
+    loading="lazy"
+    referrerPolicy="no-referrer-when-downgrade"
+    className="absolute inset-0 h-full w-full"
+  />
+</div>
+
 
         <div className="space-y-4">
           {BRANCHES.map((branch, index) => (

@@ -32,6 +32,7 @@ const TESTS_PER_PAGE = 9;
 
 export function TestsPage() {
   const { openBooking } = useBooking();
+  
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
   const [currentPage, setCurrentPage] = useState(0);
