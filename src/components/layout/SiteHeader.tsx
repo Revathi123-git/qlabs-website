@@ -1,6 +1,7 @@
+
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { ArrowRight, Menu, Phone, X } from 'lucide-react';
+import { ArrowRight, Menu, Phone, X, UserRound } from 'lucide-react';
 import { useBooking } from '@/context/booking-context';
 import { SITE_CONTACT } from '@/data/mock-data';
 import { toTelHref } from '@/lib/phone';
@@ -14,6 +15,8 @@ const NAV_ITEMS = [
   { label: 'Contact', to: '/contact' },
 ];
 
+const CLIENT_LOGIN_URL = 'https://lims8.zebricon.com/';
+
 export function SiteHeader() {
   const { openBooking } = useBooking();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,6 +24,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-line/80 bg-white/95 backdrop-blur-md">
       <div className="mx-auto flex max-w-[1240px] items-center justify-between gap-6 px-5 py-3 lg:px-8">
+
         <Link to="/" className="flex shrink-0 items-center" aria-label="Q Labs Diagnostics home">
           <img src="/logo.webp" alt="Q Labs Diagnostics" className="h-11 w-auto object-contain" />
         </Link>
@@ -41,13 +45,28 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-5 lg:flex">
-          <a href={toTelHref(SITE_CONTACT.phones[0])} className="hidden items-center gap-2 text-sm font-semibold text-ink transition hover:text-brand-teal-600 xl:flex">
+        <div className="hidden items-center gap-3 lg:flex">
+          <a
+            href={toTelHref(SITE_CONTACT.phones[0])}
+            className="hidden items-center gap-2 text-sm font-semibold text-ink transition hover:text-brand-teal-600 xl:flex"
+          >
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-teal-50 text-brand-teal-500">
               <Phone size={15} />
             </span>
             {SITE_CONTACT.phones[0]}
           </a>
+
+          {/* Client Login */}
+          <a
+            href={CLIENT_LOGIN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-brand-blue-700 px-4 py-3 text-sm font-semibold text-brand-blue-700 transition hover:bg-brand-blue-700 hover:text-white"
+          >
+            <UserRound size={16} />
+            Client Login
+          </a>
+
           <button onClick={() => openBooking()} className="btn-primary !px-5 !py-3">
             Search Tests
             <ArrowRight size={16} />
@@ -82,7 +101,20 @@ export function SiteHeader() {
                 {item.label}
               </NavLink>
             ))}
+
+            {/* Mobile Client Login */}
+            <a
+              href={CLIENT_LOGIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setIsMenuOpen(false)}
+              className="mt-2 flex items-center gap-2 rounded-xl border border-brand-blue-700 px-4 py-3 text-sm font-semibold text-brand-blue-700"
+            >
+              <UserRound size={17} />
+              Client Login
+            </a>
           </nav>
+
           <button
             onClick={() => {
               setIsMenuOpen(false);
